@@ -25,10 +25,16 @@ To compile TypeScript files:
 npm run build
 ```
 
-To run the test script:
+To start the script:
 
 ```bash
 npm start
+```
+
+To run the test script:
+
+```bash
+npm test
 ```
 
 ## License
