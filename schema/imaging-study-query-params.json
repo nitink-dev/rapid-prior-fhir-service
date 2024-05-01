@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "imaging-study-query-params.json",
+  "title": "ImagingStudyQueryParams",
+  "type": "object",
+  "properties": {
+    "p": {
+      "type": "number"
+    },
+    "rpp": {
+      "type": "number"
+    },
+    "orderBy": {
+      "description": "array of fields to order by, use '-' prefix for descending order",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "systemOID": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "p",
+    "rpp",
+    "orderBy",
+    "systemOID"
+  ],
+  "additionalProperties": false
+}
+

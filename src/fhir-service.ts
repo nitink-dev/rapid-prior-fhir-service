@@ -1,4 +1,8 @@
-import { Patient, ImagingObjectSelectionStudy } from "fhir/r2";
+import { Patient } from "fhir/r2";
+import { PatientInfoModel } from "./models/patient-info.model";
+import { mapPatientToFhirModel, mapPatientsToFhirModels } from "./util/fhirMapper";
+import { PatientInfoQueryParamsModel } from "./models/patient-info-query-params.model";
+import { PatientInfoCollectionResultModel } from "./models/patient-info-collection-result.model";
 
 /**
  * FhirService class handles interactions with the FHIR server.
@@ -16,42 +20,69 @@ class FhirService {
   }
 
   /**
-   * Retrieves patient data from the FHIR server based on local ID and system.
-   * @param localId The local ID of the patient.
-   * @param system The system OID associated with the patient.
-   * @returns A Promise resolving to the patient response from the server.
+   * Get patient data from the FHIR server based on the provided patient ID.
+   * @param id The ID of the patient.
+   * @returns A Promise resolving to the patient information.
    * @throws Error if there is an issue fetching patient data.
    */
-  async getPatientData(patientId: string, system?: string, localId?: string): Promise<any> {
-    let queryUrl: string;
-
-    if (patientId && system && localId) {
-        // If all three parameters are provided, search by localId and system
-        queryUrl = `${this.fhirEndpoint}/Patient/?localId=${localId}&system=${system}`;
-    } else if (patientId) {
-        // If only patientId is provided, search by patientId
-        queryUrl = `${this.fhirEndpoint}/Patient/${patientId}`;
-    } else {
-        throw new Error("Invalid parameters provided.");
-    }
-
-    console.log("QueryURL: ", queryUrl);
-
-    const response = await fetch(queryUrl);
-    
-    if (!response.ok) {
-        throw new Error(`Error fetching patient data: ${response.statusText}`);
-    }
-
-    const responseData = await response.json();
-
+  async getPatientById(id: string): Promise<PatientInfoModel> {
     try {
-        return responseData as Patient;
+      // Construct the query URL for fetching patient by ID
+      const queryUrl = `${this.fhirEndpoint}/Patient/${id}`;
+
+      console.log("QueryURL: ", queryUrl);
+
+      // Fetch patient data from the FHIR server
+      const response = await fetch(queryUrl);
+
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(`Error fetching patient by ID: ${response.statusText}`);
+      }
+
+      // Parse and map the response data to our model
+      const responseData = await response.json() as Patient;
+      // mapping fhir patient to desired modal
+      return mapPatientToFhirModel(responseData);
+
     } catch (error) {
         console.error("Error parsing response data as Patient:", error);
-        return null;
+        throw error;
     }
   }
+
+ 
+  /**
+   * Search patients on the FHIR server based on the provided query parameters.
+   * @param queryParams The query parameters for patient search.
+   * @returns A Promise resolving to the patient collection result.
+   * @throws Error if there is an issue fetching patient data.
+   */
+  async searchPatients(queryParams: PatientInfoQueryParamsModel): Promise<PatientInfoCollectionResultModel> {
+    try{
+        // Construct the query URL based on the provided query parameters
+        const queryUrl = `${this.fhirEndpoint}/Patient/?localId=${queryParams.localId}&system=${queryParams.system}`;
+
+        console.log("QueryURL: ", queryUrl);
+
+        const response = await fetch(queryUrl);
+        
+        if (!response.ok) {
+            throw new Error(`Error fetching patient data: ${response.statusText}`);
+        }
+
+        const responseData = await response.json();
+
+        console.log("response Data: ", responseData);
+
+        
+        // Map the FHIR Patient objects to PatientInfoModel objects using the utility method
+        return mapPatientsToFhirModels(responseData, this); // Pass both responseData and this (FhirService instance)
+    } catch (error) {
+        console.error("Error parsing response data as Patient:", error);
+        throw error;
+    }
+}
 
 
   /**

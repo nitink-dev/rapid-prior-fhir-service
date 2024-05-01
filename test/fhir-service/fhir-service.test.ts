@@ -10,11 +10,10 @@ describe("FhirService", () => {
 
   it("should fetch patient data with local ID and system", async () => {
     // Define test local ID and system
-    const localId = '123456';
-    const system = 'system123';
+    const queryParams = { localId: '123456', system: 'system123' };
 
-    // Call the getPatientData method with test local ID and system
-    const patientData = await service.getPatientData(localId, system);
+    // Call the searchPatients method with test query parameters
+    const patientData = await service.searchPatients(queryParams);
 
     // Print the patient data received from the server
     console.log("Patient Data:", patientData);
@@ -22,14 +21,14 @@ describe("FhirService", () => {
     // Assert that patientData is not null and has expected properties
     expect(patientData).toBeDefined();
     // Add more assertions as needed
-  });
+  }, 10000); // Set the timeout to 10000 ms (10 seconds)
 
   it("should fetch patient data by patient ID", async () => {
     // Define test patient ID
     const patientId = '8d67df7f-1743-4083-a873-7786c38d55eb';
 
-    // Call the getPatientData method with test patient ID
-    const patientData = await service.getPatientData(patientId);
+    // Call the getPatientById method with test patient ID
+    const patientData = await service.getPatientById(patientId);
 
     // Print the patient data received from the server
     console.log("Patient Data:", patientData);

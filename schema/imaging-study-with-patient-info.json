@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "title": "ImagingStudyWithPatientInfo",
+  "$id": "imaging-study-with-patient-info.json",
+  "type": "object",
+  "properties": {
+    "patientInfo": {
+      "$ref": "patient-info.json"
+    },
+    "imagingStudy": {
+     "$ref": "imaging-study.json"
+    }
+  },
+  "required": [
+    "patientInfo",
+    "imagingStudy"
+  ],
+  "additionalProperties": false
+}
