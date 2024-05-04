@@ -20,6 +20,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@ischemaview/rapid-priors-data": "file:../rapid-priors-data",
     "@types/fhir": "^0.0.41"
   }
 }

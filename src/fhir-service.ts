@@ -1,8 +1,11 @@
 import { Patient } from "fhir/r2";
-import { PatientInfoModel } from "./models/patient-info.model";
-import { mapPatientToFhirModel, mapPatientsToFhirModels } from "./util/fhirMapper";
 import { PatientInfoQueryParamsModel } from "./models/patient-info-query-params.model";
 import { PatientInfoCollectionResultModel } from "./models/patient-info-collection-result.model";
+import { mapImageStudyToModel } from "./util/fhirImageStudyMapper";
+import { mapPatientToFhirModel } from "./util/fhirPatientMapper";
+import { PatientInfoModel } from '@ischemaview/rapid-priors-data/src';
+import { mapPatientsToFhirModels } from "./util/fhirMapper";
+
 
 /**
  * FhirService class handles interactions with the FHIR server.
@@ -82,25 +85,17 @@ class FhirService {
         console.error("Error parsing response data as Patient:", error);
         throw error;
     }
-}
+  }
 
 
   /**
    * Retrieves ImagingStudy data for a specific patient from the FHIR server.
    * @param patientId The ID of the patient.
-   * @param filters Additional filters to apply to the query.
    * @returns A Promise resolving to the ImagingStudy data.
    * @throws Error if there is an issue fetching imaging study data.
    */
-  //async getImagingStudyData(patientId: string, filters: string): Promise<any> {
-  async getImagingStudyData(patientId: string, filters?: string): Promise<any> {
-    let queryUrl: string;
-    
-    if(filters){
-      queryUrl = `${this.fhirEndpoint}/ImagingStudy/?subject=patient/${patientId}&${filters}`;
-    } else {
-      queryUrl = `${this.fhirEndpoint}/ImagingStudy/?subject=patient/${patientId}`;
-    }
+  async getImagingStudyDataByPatientId(patientId: string): Promise<any> {
+    const queryUrl = `${this.fhirEndpoint}/ImagingStudy/?subject=patient/${patientId}`;
 
     console.log("QueryURL: ", queryUrl);
 
@@ -112,12 +107,36 @@ class FhirService {
     }
 
     // Parse and return the response data as JSON
-    //return await response.json();
-    //
+    const responseData = await response.json();
+    // Map the response data to ImagingStudyWithPatientInfoModel
+    const modelData = mapImageStudyToModel(responseData);
+
+    return modelData;
+  }
+
+  /**
+   * Retrieves ImagingStudy data with filters from the FHIR server.
+   * @param filters Additional filters to apply to the query.
+   * @returns A Promise resolving to the ImagingStudy data.
+   * @throws Error if there is an issue fetching imaging study data.
+   */
+  async getImagingStudyDataWithFilters(filters: string): Promise<any> {
+    const queryUrl = `${this.fhirEndpoint}/ImagingStudy/?${filters}`;
+
+    console.log("QueryURL: ", queryUrl);
+
+    const response = await fetch(queryUrl);
+    
+    // Check if the response is successful
+    if (!response.ok) {
+      throw new Error(`Error fetching imaging study data: ${response.statusText}`);
+    }
+
+    // Parse and return the response data as JSON
     const responseData = await response.json();
     return responseData;
-    //return responseData as ImagingObjectSelectionStudy
   }
 }
+
 
 export default FhirService;

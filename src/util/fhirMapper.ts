@@ -8,6 +8,8 @@ import FhirService from "../fhir-service";
  * @param patient The FHIR Patient object to be mapped.
  * @returns The mapped PatientInfoModel object.
  */
+
+// TODO: this file will be removed once other mappers are active for all...
 export function mapPatientToFhirModel(patient: Patient): PatientInfoModel {
     // Extract the patient's name from the FHIR HumanName object
     const name: string = parseHumanName(patient.name && patient.name[0]); 
