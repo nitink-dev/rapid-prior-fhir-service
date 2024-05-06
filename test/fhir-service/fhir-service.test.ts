@@ -1,4 +1,6 @@
 import FhirService from '../../src/fhir-service';
+import { PatientInfoQueryParamsModel } from '@ischemaview/rapid-priors-data/src/typescript/model/patient-info-query-params.model';
+
 
 describe("FhirService", () => {
   let service: FhirService;
@@ -10,7 +12,7 @@ describe("FhirService", () => {
 
   it("should fetch patient data with local ID and system", async () => {
     // Define test local ID and system
-    const queryParams = { localId: '123456', system: 'system123' };
+  const queryParams = PatientInfoQueryParamsModel.fromObject({ localId: '123456', system: 'system123' });
 
     // Call the searchPatients method with test query parameters
     const patientData = await service.searchPatients(queryParams);

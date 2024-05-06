@@ -1,30 +1,29 @@
-import { ImagingStudyModel } from '@ischemaview/rapid-priors-data/src';
-import { ImagingStudyWithPatientInfoModel } from '@ischemaview/rapid-priors-data/src';
-import { PatientInfoModel } from '@ischemaview/rapid-priors-data/src';
+import { ImagingStudyModel } from '@ischemaview/rapid-priors-data/src/typescript/model/imaging-study.model';
+import { ImagingStudyWithPatientInfoModel } from '@ischemaview/rapid-priors-data/src/typescript/model/imaging-study-with-patient-info.model';
+import { PatientInfoModel } from '@ischemaview/rapid-priors-data/src/typescript/model/patient-info.model';
+import { ImagingStudyWithPatientInfoCollectionResultModel } from '@ischemaview/rapid-priors-data/src/typescript/model/imaging-study-with-patient-info-collection-result.model';
+
 
 /**
  * Maps the FHIR response data to ImagingStudyWithPatientInfoModel.
  * @param response FHIR response data.
  * @returns An array of ImagingStudyWithPatientInfoModel instances.
  */
-export function mapImageStudyToModel(response: any): ImagingStudyWithPatientInfoModel[] {
+export function mapImageStudyToModel(response: any): ImagingStudyWithPatientInfoModel {
     if (!response || !response.entry || !Array.isArray(response.entry)) {
         throw new Error('Invalid response format');
     }
-
-    const models: ImagingStudyWithPatientInfoModel[] = [];
 
     for (const entry of response.entry) {
         const resource = entry.resource;
         if (resource && resource.resourceType === 'ImagingStudy') {
             const imagingStudy = mapImagingStudy(resource);
             const patientInfo = mapPatientInfo(resource.subject?.reference);
-            const model = new ImagingStudyWithPatientInfoModel({ imagingStudy, patientInfo });
-            models.push(model);
+            return new ImagingStudyWithPatientInfoModel({ imagingStudy, patientInfo });
         }
     }
 
-    return models;
+    throw new Error('No ImagingStudy resource found in response');
 }
 
 /**
@@ -65,4 +64,30 @@ function mapPatientInfo(reference: string | undefined): PatientInfoModel {
         // TODO: Map other properties as needed
     });
     return patientInfo;
+}
+
+/**
+ * Maps the JSON response data to ImagingStudyWithPatientInfoCollectionResultModel.
+ * @param response JSON response data.
+ * @returns An instance of ImagingStudyWithPatientInfoCollectionResultModel.
+ */
+export function mapJsonToCollectionResultModel(response: any): ImagingStudyWithPatientInfoCollectionResultModel {
+    if (!response || !response.entry || !Array.isArray(response.entry)) {
+        throw new Error('Invalid response format');
+    }
+
+    const entities = response.entry.map((entry: any) => mapImageStudyToModel(entry.resource));
+
+    // TODO: modify the queryParams as availability...
+    const queryParams = {
+        p: 0, // Example value, modify according to your requirements
+        rpp: 10, // Example value, modify according to your requirements
+        orderBy: '', // Example value, modify according to your requirements
+    };
+
+    return new ImagingStudyWithPatientInfoCollectionResultModel({
+        entities,
+        queryParams,
+        // Other properties initialization as needed...
+    });
 }
